@@ -4,6 +4,40 @@ const contactForm = document.getElementById("contactForm");
 const contactFormStatus = document.getElementById("contactFormStatus");
 const contactThankYouOverlay = document.getElementById("contactThankYouOverlay");
 const closeContactThanks = document.getElementById("closeContactThanks");
+const contactSubmissionTimestampIso = document.getElementById("contactSubmissionTimestampIso");
+const contactSubmissionTimestampLocal = document.getElementById("contactSubmissionTimestampLocal");
+const contactSubmissionId = document.getElementById("contactSubmissionId");
+
+function buildSubmissionMetadata(prefix) {
+  const now = new Date();
+  const timestampIso = now.toISOString();
+
+  // Produce a deterministic, timezone-explicit local timestamp in
+  // ISO8601-like format with timezone offset (e.g. 2026-02-15T13:45:30.123-05:00).
+  const pad = (n, width = 2) => String(n).padStart(width, "0");
+  const year = now.getFullYear();
+  const month = pad(now.getMonth() + 1);
+  const day = pad(now.getDate());
+  const hours = pad(now.getHours());
+  const minutes = pad(now.getMinutes());
+  const seconds = pad(now.getSeconds());
+  const milliseconds = pad(now.getMilliseconds(), 3);
+  const tzOffsetMinutes = -now.getTimezoneOffset(); // minutes east of UTC
+  const tzSign = tzOffsetMinutes >= 0 ? "+" : "-";
+  const tzAbs = Math.abs(tzOffsetMinutes);
+  const tzHours = pad(Math.floor(tzAbs / 60));
+  const tzMinutes = pad(tzAbs % 60);
+  const timestampLocal = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}${tzSign}${tzHours}:${tzMinutes}`;
+
+  const randomSuffix = Math.random().toString(36).slice(2, 8).toUpperCase();
+  const submissionId = `${prefix}-${now.getTime()}-${randomSuffix}`;
+
+  return {
+    timestampIso,
+    timestampLocal,
+    submissionId
+  };
+}
 
 function showContactSuccessScreen() {
   if (!contactThankYouOverlay) {
@@ -33,13 +67,23 @@ if (contactForm && contactFormStatus) {
       return;
     }
 
-    // Honeypot check: if this field is filled, treat it like spam.
-    const formData = new FormData(contactForm);
-    if (formData.get("_gotcha")) {
-      contactFormStatus.textContent = "Thanks for your message.";
-      contactFormStatus.className = "contact-form-status success";
-      return;
+    // Build metadata so each submission has traceable timestamp and ID fields.
+    const metadata = buildSubmissionMetadata("CONTACT");
+    if (contactSubmissionTimestampIso) {
+      contactSubmissionTimestampIso.value = metadata.timestampIso;
     }
+    if (contactSubmissionTimestampLocal) {
+      contactSubmissionTimestampLocal.value = metadata.timestampLocal;
+    }
+    if (contactSubmissionId) {
+      contactSubmissionId.value = metadata.submissionId;
+    }
+
+    // Build FormData payload, including metadata fields.
+    const formData = new FormData(contactForm);
+    formData.set("submission_timestamp_iso", metadata.timestampIso);
+    formData.set("submission_timestamp_local", metadata.timestampLocal);
+    formData.set("submission_id", metadata.submissionId);
 
     contactFormStatus.textContent = "Sending...";
     contactFormStatus.className = "contact-form-status";

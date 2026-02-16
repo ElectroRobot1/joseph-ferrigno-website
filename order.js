@@ -1,9 +1,13 @@
+const lawnMowingWeedWhackingService = {
+  name: "Lawn Mowing/Weed Whacking",
+  description: "Provide the details below so I can quote and schedule your yard service.",
+  needsHouseType: true
+};
+
 const SERVICES = {
-  "lawn-mowing-weed-wacking": {
-    name: "Lawn Mowing/Weed Wacking",
-    description: "Provide the details below so I can quote and schedule your yard service.",
-    needsHouseType: true
-  },
+  "lawn-mowing-weed-whacking": lawnMowingWeedWhackingService,
+  // Keep legacy misspelling so older shared links still resolve.
+  "lawn-mowing-weed-wacking": lawnMowingWeedWhackingService,
   "lawn-cleanup": {
     name: "Lawn Cleanup",
     description: "Share what kind of cleanup you need and any timing details."
@@ -64,6 +68,37 @@ const PET_OPTIONS = [
   "Amphibian",
   "Other"
 ];
+
+function buildSubmissionMetadata(prefix) {
+  const now = new Date();
+  const timestampIso = now.toISOString();
+
+  // Deterministic local timestamp format with explicit timezone offset
+  // Example: 2026-02-15T13:45:30.123-05:00
+  const pad = (n, width = 2) => String(n).padStart(width, "0");
+  const year = now.getFullYear();
+  const month = pad(now.getMonth() + 1);
+  const day = pad(now.getDate());
+  const hours = pad(now.getHours());
+  const minutes = pad(now.getMinutes());
+  const seconds = pad(now.getSeconds());
+  const milliseconds = pad(now.getMilliseconds(), 3);
+  const tzOffsetMinutes = -now.getTimezoneOffset();
+  const tzSign = tzOffsetMinutes >= 0 ? "+" : "-";
+  const tzAbs = Math.abs(tzOffsetMinutes);
+  const tzHours = pad(Math.floor(tzAbs / 60));
+  const tzMinutes = pad(tzAbs % 60);
+  const timestampLocal = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}${tzSign}${tzHours}:${tzMinutes}`;
+
+  const randomSuffix = Math.random().toString(36).slice(2, 8).toUpperCase();
+  const submissionId = `${prefix}-${now.getTime()}-${randomSuffix}`;
+
+  return {
+    timestampIso,
+    timestampLocal,
+    submissionId
+  };
+}
 
 function appendRequiredStar(labelElement) {
   const star = document.createElement("span");
@@ -356,7 +391,7 @@ function addBabysittingFields(container) {
 function initializeOrderPage() {
   const params = new URLSearchParams(window.location.search);
   const serviceKey = params.get("service");
-  const selectedService = SERVICES[serviceKey] || SERVICES["lawn-mowing-weed-wacking"];
+  const selectedService = SERVICES[serviceKey] || SERVICES["lawn-mowing-weed-whacking"];
 
   const serviceTitle = document.getElementById("serviceTitle");
   const serviceDescription = document.getElementById("serviceDescription");
@@ -366,7 +401,12 @@ function initializeOrderPage() {
   const orderFormStatus = document.getElementById("orderFormStatus");
   const orderThankYouOverlay = document.getElementById("orderThankYouOverlay");
   const orderThankYouText = document.getElementById("orderThankYouText");
+  const orderEmailConfirmNote = document.getElementById("orderEmailConfirmNote");
   const closeOrderThanks = document.getElementById("closeOrderThanks");
+  const orderSubmissionTimestampIso = document.getElementById("orderSubmissionTimestampIso");
+  const orderSubmissionTimestampLocal = document.getElementById("orderSubmissionTimestampLocal");
+  const orderSubmissionId = document.getElementById("orderSubmissionId");
+  const orderEmailForFormspree = document.getElementById("orderEmailForFormspree");
   const emailField = form.elements.customerEmail;
   const phoneField = form.elements.customerPhone;
 
@@ -374,12 +414,17 @@ function initializeOrderPage() {
   serviceDescription.textContent = selectedService.description;
   serviceNameField.value = selectedService.name;
 
-  const showOrderSuccessScreen = () => {
+  const showOrderSuccessScreen = (hasEmail) => {
     if (!orderThankYouOverlay) {
       return;
     }
     if (orderThankYouText) {
       orderThankYouText.textContent = `Your ${selectedService.name} request was delivered successfully.`;
+    }
+    if (orderEmailConfirmNote) {
+      orderEmailConfirmNote.textContent = hasEmail
+        ? "A confirmation email was sent. Please check your inbox and spam folder."
+        : "No email was provided, so no confirmation email was sent.";
     }
     orderThankYouOverlay.hidden = false;
   };
@@ -444,14 +489,27 @@ function initializeOrderPage() {
       return;
     }
 
-    const formData = new FormData(form);
-
-    // Honeypot check: if this field is filled, treat as spam.
-    if (formData.get("_gotcha")) {
-      orderFormStatus.textContent = "";
-      showOrderSuccessScreen();
-      return;
+    const trimmedEmail = emailField.value.trim();
+    if (orderEmailForFormspree) {
+      orderEmailForFormspree.value = trimmedEmail;
     }
+
+    const metadata = buildSubmissionMetadata("ORDER");
+    if (orderSubmissionTimestampIso) {
+      orderSubmissionTimestampIso.value = metadata.timestampIso;
+    }
+    if (orderSubmissionTimestampLocal) {
+      orderSubmissionTimestampLocal.value = metadata.timestampLocal;
+    }
+    if (orderSubmissionId) {
+      orderSubmissionId.value = metadata.submissionId;
+    }
+
+    const formData = new FormData(form);
+    formData.set("submission_timestamp_iso", metadata.timestampIso);
+    formData.set("submission_timestamp_local", metadata.timestampLocal);
+    formData.set("submission_id", metadata.submissionId);
+    formData.set("email", trimmedEmail);
 
     try {
       const response = await fetch(form.action, {
@@ -464,8 +522,11 @@ function initializeOrderPage() {
 
       if (response.ok) {
         form.reset();
+        if (orderEmailForFormspree) {
+          orderEmailForFormspree.value = "";
+        }
         orderFormStatus.textContent = "";
-        showOrderSuccessScreen();
+        showOrderSuccessScreen(trimmedEmail.length > 0);
         return;
       }
 

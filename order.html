@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Service Order | Joseph Ferrigno</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="order-page">
+  <header>
+    <h1>Service Order Request</h1>
+    <p>
+      Fill out the details below and I will follow up to confirm your request.
+    </p>
+  </header>
+
+  <section class="order-section">
+    <a class="back-link" href="index.html">&larr; Back to Services</a>
+    <div class="order-shell">
+      <h2 id="serviceTitle">Selected Service</h2>
+      <p id="serviceDescription"></p>
+
+      <form id="orderForm">
+        <input id="serviceNameField" name="serviceName" type="hidden">
+
+        <div class="form-grid">
+          <label class="field">
+            <span>Your Name</span>
+            <input name="customerName" type="text" required>
+          </label>
+
+          <label class="field">
+            <span>Email</span>
+            <input name="customerEmail" type="email" required>
+          </label>
+
+          <label class="field">
+            <span>Phone</span>
+            <input name="customerPhone" type="tel" required>
+          </label>
+
+          <label class="field">
+            <span>Address</span>
+            <input name="serviceAddress" type="text" required>
+          </label>
+        </div>
+
+        <div id="dynamicFields"></div>
+
+        <label class="field">
+          <span>Preferred Date</span>
+          <input name="preferredDate" type="date">
+        </label>
+
+        <label class="field">
+          <span>Additional Details</span>
+          <textarea name="additionalDetails" placeholder="Anything else you want me to know?"></textarea>
+        </label>
+
+        <button class="submit-btn" type="submit">Submit Request</button>
+        <p class="submit-message" id="submitMessage" hidden>
+          Thanks. Your request is recorded on this page and ready to review.
+        </p>
+      </form>
+    </div>
+  </section>
+
+  <script src="order.js"></script>
+</body>
+</html>

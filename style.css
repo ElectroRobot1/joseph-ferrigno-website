@@ -53,6 +53,148 @@ h2 {
   text-align: center;
 }
 
+.service-card {
+  color: #1f2933;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  min-height: 90px;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.service-card:hover,
+.service-card:focus-visible {
+  background-color: #f0fdf4;
+  box-shadow: 0 10px 20px rgba(20,83,45,0.2);
+  transform: translateY(-2px);
+}
+
+.service-card:focus-visible {
+  outline: 3px solid #166534;
+  outline-offset: 2px;
+}
+
+.order-section {
+  max-width: 900px;
+}
+
+.back-link {
+  color: #14532d;
+  display: inline-block;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-decoration: none;
+}
+
+.back-link:hover,
+.back-link:focus-visible {
+  text-decoration: underline;
+}
+
+.order-shell {
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  padding: 1.5rem;
+}
+
+.order-shell h2 {
+  margin-top: 0;
+}
+
+.order-shell p {
+  margin-top: 0.25rem;
+}
+
+.form-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.field {
+  display: block;
+  margin-top: 1rem;
+}
+
+.field span {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.field input,
+.field select,
+.field textarea {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font: inherit;
+  padding: 0.55rem 0.7rem;
+  width: 100%;
+}
+
+.field textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.slider-field input[type="number"] {
+  max-width: 150px;
+  margin-bottom: 0.5rem;
+}
+
+.slider-field input[type="range"] {
+  accent-color: #166534;
+  padding: 0;
+}
+
+.dynamic-group {
+  border-top: 1px solid #e5e7eb;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+}
+
+.dynamic-group h3 {
+  color: #14532d;
+  margin: 0 0 0.25rem;
+}
+
+.other-input {
+  margin-top: 0.6rem;
+}
+
+.submit-btn {
+  background: #166534;
+  border: 0;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  padding: 0.7rem 1rem;
+}
+
+.submit-btn:hover,
+.submit-btn:focus-visible {
+  background: #14532d;
+}
+
+.submit-message {
+  color: #14532d;
+  font-weight: 600;
+  margin-top: 0.8rem;
+}
+
+@media (max-width: 760px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .tags span {
   display: inline-block;
   background: #dcfce7;

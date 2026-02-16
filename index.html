@@ -64,8 +64,37 @@
 
   <section>
     <h2>Contact</h2>
-    <p>Email: joseph.ferrigno9@gmail.com</p>
-    <p>Phone: (703) 727-3803</p>
+    <!-- Replace the action URL with your real Formspree endpoint -->
+    <form
+      id="contactForm"
+      class="contact-form"
+      action="https://formspree.io/f/xwvnodyr"
+      method="POST"
+    >
+      <label class="field" for="contactName">
+        <span>Name</span>
+        <input id="contactName" name="name" type="text" required>
+      </label>
+
+      <label class="field" for="contactEmail">
+        <span>Email</span>
+        <input id="contactEmail" name="email" type="email" required>
+      </label>
+
+      <label class="field" for="contactMessage">
+        <span>Message</span>
+        <textarea id="contactMessage" name="message" required></textarea>
+      </label>
+
+      <!-- Honeypot field for bots: keep hidden and leave empty -->
+      <div class="hp-field" aria-hidden="true">
+        <label for="company">Company</label>
+        <input id="company" name="_gotcha" type="text" tabindex="-1" autocomplete="off">
+      </div>
+
+      <button class="submit-btn" type="submit">Send Message</button>
+      <p id="contactFormStatus" class="contact-form-status" role="status" aria-live="polite"></p>
+    </form>
   </section>
 
   <footer>

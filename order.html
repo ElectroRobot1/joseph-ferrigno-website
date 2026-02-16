@@ -19,28 +19,32 @@
     <div class="order-shell">
       <h2 id="serviceTitle">Selected Service</h2>
       <p id="serviceDescription"></p>
+      <p class="form-note">
+        Required fields are marked <span class="required-star" aria-hidden="true">*</span>.
+        You only need to provide one contact method: email or phone.
+      </p>
 
       <form id="orderForm">
         <input id="serviceNameField" name="serviceName" type="hidden">
 
         <div class="form-grid">
           <label class="field">
-            <span>Your Name</span>
+            <span>Your Name <span class="required-star" aria-hidden="true">*</span></span>
             <input name="customerName" type="text" required>
           </label>
 
           <label class="field">
-            <span>Email</span>
-            <input name="customerEmail" type="email" required>
+            <span>Email <span class="required-star" aria-hidden="true">*</span></span>
+            <input name="customerEmail" type="email">
           </label>
 
           <label class="field">
-            <span>Phone</span>
-            <input name="customerPhone" type="tel" required>
+            <span>Phone <span class="required-star" aria-hidden="true">*</span></span>
+            <input name="customerPhone" type="tel">
           </label>
 
           <label class="field">
-            <span>Address</span>
+            <span>Address <span class="required-star" aria-hidden="true">*</span></span>
             <input name="serviceAddress" type="text" required>
           </label>
         </div>

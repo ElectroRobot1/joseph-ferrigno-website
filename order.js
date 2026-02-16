@@ -65,6 +65,14 @@ const PET_OPTIONS = [
   "Other"
 ];
 
+function appendRequiredStar(labelElement) {
+  const star = document.createElement("span");
+  star.className = "required-star";
+  star.setAttribute("aria-hidden", "true");
+  star.textContent = " *";
+  labelElement.appendChild(star);
+}
+
 function clamp(value, min, max) {
   if (Number.isNaN(value)) {
     return min;
@@ -95,6 +103,9 @@ function createSliderControl(config) {
 
   const label = document.createElement("span");
   label.textContent = config.label;
+  if (config.required) {
+    appendRequiredStar(label);
+  }
   wrapper.appendChild(label);
 
   const numberInput = document.createElement("input");
@@ -154,6 +165,7 @@ function addHouseTypeFields(container) {
 
   const fieldLabel = document.createElement("span");
   fieldLabel.textContent = "House Type";
+  appendRequiredStar(fieldLabel);
   field.appendChild(fieldLabel);
 
   const select = document.createElement("select");
@@ -208,7 +220,8 @@ function addWindowFields(container) {
     min: 1,
     max: 80,
     value: 10,
-    name: "windowCount"
+    name: "windowCount",
+    required: true
   });
 
   group.appendChild(windowsControl.wrapper);
@@ -226,7 +239,8 @@ function addPetFields(container) {
     min: 1,
     max: 12,
     value: 1,
-    name: "petCount"
+    name: "petCount",
+    required: true
   });
 
   group.appendChild(petCountControl.wrapper);
@@ -244,6 +258,7 @@ function addPetFields(container) {
 
       const petLabel = document.createElement("span");
       petLabel.textContent = `Pet ${index} Type`;
+      appendRequiredStar(petLabel);
       petTypeField.appendChild(petLabel);
 
       const select = document.createElement("select");
@@ -305,7 +320,8 @@ function addBabysittingFields(container) {
     min: 1,
     max: 10,
     value: 1,
-    name: "kidCount"
+    name: "kidCount",
+    required: true
   });
 
   group.appendChild(childCountControl.wrapper);
@@ -323,7 +339,8 @@ function addBabysittingFields(container) {
         min: 0,
         max: 17,
         value: 8,
-        name: `child${index}Age`
+        name: `child${index}Age`,
+        required: true
       });
       agesContainer.appendChild(ageControl.wrapper);
     }
@@ -347,10 +364,26 @@ function initializeOrderPage() {
   const dynamicFields = document.getElementById("dynamicFields");
   const form = document.getElementById("orderForm");
   const submitMessage = document.getElementById("submitMessage");
+  const emailField = form.elements.customerEmail;
+  const phoneField = form.elements.customerPhone;
 
   serviceTitle.textContent = `${selectedService.name} Request`;
   serviceDescription.textContent = selectedService.description;
   serviceNameField.value = selectedService.name;
+
+  const validateContactMethod = () => {
+    const hasEmail = emailField.value.trim().length > 0;
+    const hasPhone = phoneField.value.trim().length > 0;
+    const isValid = hasEmail || hasPhone;
+    const message = "Please provide at least one contact method: email or phone.";
+
+    emailField.setCustomValidity(isValid ? "" : message);
+    phoneField.setCustomValidity(isValid ? "" : message);
+    return isValid;
+  };
+
+  emailField.addEventListener("input", validateContactMethod);
+  phoneField.addEventListener("input", validateContactMethod);
 
   if (selectedService.needsHouseType) {
     addHouseTypeFields(dynamicFields);
@@ -370,6 +403,13 @@ function initializeOrderPage() {
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
+
+    const hasValidContactMethod = validateContactMethod();
+    if (!hasValidContactMethod || !form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
     submitMessage.hidden = false;
     submitMessage.textContent = `Thanks. Your ${selectedService.name} request is ready to review.`;
   });

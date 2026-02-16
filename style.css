@@ -108,6 +108,12 @@ h2 {
   margin-top: 0.25rem;
 }
 
+.form-note {
+  color: #374151;
+  font-size: 0.95rem;
+  margin: 0.5rem 0 0.75rem;
+}
+
 .form-grid {
   display: grid;
   gap: 1rem;
@@ -123,6 +129,11 @@ h2 {
   display: block;
   font-weight: 600;
   margin-bottom: 0.4rem;
+}
+
+.required-star {
+  color: #dc2626;
+  font-weight: 700;
 }
 
 .field input,
@@ -187,6 +198,33 @@ h2 {
   color: #14532d;
   font-weight: 600;
   margin-top: 0.8rem;
+}
+
+.contact-form {
+  max-width: 700px;
+}
+
+.hp-field {
+  left: -9999px;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.contact-form-status {
+  margin-top: 0.9rem;
+  min-height: 1.4rem;
+}
+
+.contact-form-status.success {
+  color: #14532d;
+  font-weight: 600;
+}
+
+.contact-form-status.error {
+  color: #b91c1c;
+  font-weight: 600;
 }
 
 @media (max-width: 760px) {

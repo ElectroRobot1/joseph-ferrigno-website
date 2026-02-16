@@ -4,54 +4,93 @@ body {
   background-color: #f5f7fa;
   color: #1f2933;
   line-height: 1.6;
+  padding-top: var(--banner-current-height, 220px);
 }
 
 [hidden] {
   display: none !important;
 }
 
-header {
+.page-header {
   background: linear-gradient(135deg, #14532d, #166534);
   color: white;
   text-align: center;
   padding: 3rem 1.5rem;
 }
 
-.home-page {
-  --hero-max-height: clamp(180px, 34vh, 300px);
-  --hero-min-height: clamp(68px, 12vh, 96px);
-  --hero-progress: 0;
-  --hero-focus-y: 50%;
-}
-
-.home-page .hero-header {
-  background: none;
-  height: calc(var(--hero-max-height) - (var(--hero-max-height) - var(--hero-min-height)) * var(--hero-progress));
+.site-banner {
+  height: var(--banner-current-height, 220px);
   left: 0;
   overflow: hidden;
-  padding: 0;
-  position: sticky;
+  position: fixed;
+  right: 0;
   top: 0;
   transition: height 140ms linear, box-shadow 200ms ease;
-  z-index: 300;
+  z-index: 1000;
 }
 
-.home-page .hero-header.is-condensed {
+.site-banner.is-condensed {
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.25);
 }
 
-.hero-banner-image {
+.banner-image {
   display: block;
   height: 100%;
+  left: 0;
   object-fit: cover;
-  object-position: center var(--hero-focus-y);
+  object-position: center center;
+  position: absolute;
+  top: 0;
+  transition: opacity 140ms linear;
   width: 100%;
+}
+
+.banner-half {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.site-banner.use-half .banner-full {
+  opacity: 0;
+}
+
+.site-banner.use-half .banner-half {
+  opacity: 1;
 }
 
 section {
   max-width: 1000px;
   margin: auto;
   padding: 3rem 1.5rem;
+}
+
+.about-section {
+  max-width: 1100px;
+}
+
+.about-layout {
+  align-items: center;
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: minmax(0, 1fr) 280px;
+}
+
+.about-text {
+  max-width: 700px;
+}
+
+.about-photo-wrap {
+  justify-self: end;
+  width: 100%;
+  max-width: 280px;
+}
+
+.about-photo {
+  border-radius: 14px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.2);
+  display: block;
+  height: auto;
+  width: 100%;
 }
 
 h2 {
@@ -330,6 +369,19 @@ h2 {
 }
 
 @media (max-width: 760px) {
+  .about-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .about-text {
+    max-width: none;
+  }
+
+  .about-photo-wrap {
+    justify-self: center;
+    max-width: 240px;
+  }
+
   .form-grid {
     grid-template-columns: 1fr;
   }

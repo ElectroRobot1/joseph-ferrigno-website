@@ -3,26 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Joseph Ferrigno's Website</title>
+  <title>GreenFrame Services</title>
+  <link rel="icon" type="image/png" href="Favicon.png">
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="home-page">
-  <header class="hero-header">
+<body>
+  <header class="site-banner" data-site-banner>
     <img
-      class="hero-banner-image"
-      src="Professional Banner Hero Image.png"
-      alt="Joseph Ferrigno professional services banner"
+      class="banner-image banner-full"
+      src="GreenFrame Services Banner.png"
+      alt="GreenFrame Services main banner"
+    >
+    <img
+      class="banner-image banner-half"
+      src="GreenFrame Services Half Banner.png"
+      alt="GreenFrame Services compact banner"
     >
   </header>
 
-  <section>
-    <h2>About Me</h2>
-    <p>
-      I'm a technically inclined, community-oriented worker with experience in automation, data organization, and digital systems, paired with real-world service work for neighbors and local clients.
-    </p>
-    <p>
-      My interests sit at the intersection of technology, environmental stewardship, and service-based work; values that align strongly with nonprofit and conservation-focused organizations.
-    </p>
+  <section class="about-section">
+    <div class="about-layout">
+      <div class="about-text">
+        <h2>About Me</h2>
+        <p>
+          A technically inclined, community-oriented worker with experience in automation, data organization, and digital systems, paired with real-world service work for neighbors and local clients.
+        </p>
+        <p>
+          Interests sit at the intersection of technology, environmental stewardship, and service-based work; values that align strongly with nonprofit and conservation-focused organizations.
+        </p>
+      </div>
+      <div class="about-photo-wrap">
+        <img
+          class="about-photo"
+          src="Professional Portrait Suit.png"
+          alt="Professional portrait for GreenFrame Services"
+        >
+      </div>
+    </div>
   </section>
 
   <section>
@@ -113,9 +130,10 @@
   </div>
 
   <footer>
-    <p>&copy; 2026 Joseph Ferrigno | Technology in Service of People and Planet</p>
+    <p>&copy; 2026 GreenFrame Services | Technology in Service of People and Planet</p>
   </footer>
 
+  <script src="banner.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

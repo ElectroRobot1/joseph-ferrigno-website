@@ -39,6 +39,40 @@ function buildSubmissionMetadata(prefix) {
   };
 }
 
+function initializeStickyHero() {
+  const heroHeader = document.querySelector(".home-page .hero-header");
+  if (!heroHeader) {
+    return;
+  }
+
+  const shrinkDistancePx = 260;
+  let isTicking = false;
+
+  const render = () => {
+    const scrollY = window.scrollY || window.pageYOffset || 0;
+    const progress = Math.min(1, Math.max(0, scrollY / shrinkDistancePx));
+
+    heroHeader.style.setProperty("--hero-progress", progress.toFixed(3));
+    heroHeader.classList.toggle("is-condensed", progress > 0.08);
+    isTicking = false;
+  };
+
+  const onViewportChange = () => {
+    if (isTicking) {
+      return;
+    }
+
+    isTicking = true;
+    window.requestAnimationFrame(render);
+  };
+
+  render();
+  window.addEventListener("scroll", onViewportChange, { passive: true });
+  window.addEventListener("resize", onViewportChange);
+}
+
+initializeStickyHero();
+
 function showContactSuccessScreen() {
   if (!contactThankYouOverlay) {
     return;

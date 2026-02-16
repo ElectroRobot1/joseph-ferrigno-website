@@ -13,15 +13,35 @@ header {
   padding: 3rem 1.5rem;
 }
 
+.home-page {
+  --hero-max-height: clamp(180px, 34vh, 300px);
+  --hero-min-height: clamp(68px, 12vh, 96px);
+  --hero-progress: 0;
+  --hero-focus-y: 50%;
+}
+
 .home-page .hero-header {
   background: none;
+  height: calc(var(--hero-max-height) - (var(--hero-max-height) - var(--hero-min-height)) * var(--hero-progress));
+  left: 0;
+  overflow: hidden;
   padding: 0;
+  position: sticky;
+  top: 0;
+  transition: height 140ms linear, box-shadow 200ms ease;
+  z-index: 300;
+}
+
+.home-page .hero-header.is-condensed {
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.25);
 }
 
 .hero-banner-image {
   display: block;
+  height: 100%;
+  object-fit: cover;
+  object-position: center var(--hero-focus-y);
   width: 100%;
-  height: auto;
 }
 
 section {

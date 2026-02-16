@@ -363,13 +363,37 @@ function initializeOrderPage() {
   const serviceNameField = document.getElementById("serviceNameField");
   const dynamicFields = document.getElementById("dynamicFields");
   const form = document.getElementById("orderForm");
-  const submitMessage = document.getElementById("submitMessage");
+  const orderFormStatus = document.getElementById("orderFormStatus");
+  const orderThankYouOverlay = document.getElementById("orderThankYouOverlay");
+  const orderThankYouText = document.getElementById("orderThankYouText");
+  const closeOrderThanks = document.getElementById("closeOrderThanks");
   const emailField = form.elements.customerEmail;
   const phoneField = form.elements.customerPhone;
 
   serviceTitle.textContent = `${selectedService.name} Request`;
   serviceDescription.textContent = selectedService.description;
   serviceNameField.value = selectedService.name;
+
+  const showOrderSuccessScreen = () => {
+    if (!orderThankYouOverlay) {
+      return;
+    }
+    if (orderThankYouText) {
+      orderThankYouText.textContent = `Your ${selectedService.name} request was delivered successfully.`;
+    }
+    orderThankYouOverlay.hidden = false;
+  };
+
+  const hideOrderSuccessScreen = () => {
+    if (!orderThankYouOverlay) {
+      return;
+    }
+    orderThankYouOverlay.hidden = true;
+  };
+
+  if (closeOrderThanks) {
+    closeOrderThanks.addEventListener("click", hideOrderSuccessScreen);
+  }
 
   const validateContactMethod = () => {
     const hasEmail = emailField.value.trim().length > 0;
@@ -401,7 +425,7 @@ function initializeOrderPage() {
     addBabysittingFields(dynamicFields);
   }
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const hasValidContactMethod = validateContactMethod();
@@ -410,8 +434,56 @@ function initializeOrderPage() {
       return;
     }
 
-    submitMessage.hidden = false;
-    submitMessage.textContent = `Thanks. Your ${selectedService.name} request is ready to review.`;
+    orderFormStatus.textContent = "Sending request...";
+    orderFormStatus.className = "contact-form-status";
+
+    if (!form.action.includes("formspree.io/f/")) {
+      orderFormStatus.textContent =
+        "Form endpoint is missing. Add your Formspree URL in order.html.";
+      orderFormStatus.className = "contact-form-status error";
+      return;
+    }
+
+    const formData = new FormData(form);
+
+    // Honeypot check: if this field is filled, treat as spam.
+    if (formData.get("_gotcha")) {
+      orderFormStatus.textContent = "";
+      showOrderSuccessScreen();
+      return;
+    }
+
+    try {
+      const response = await fetch(form.action, {
+        method: "POST",
+        body: formData,
+        headers: {
+          Accept: "application/json"
+        }
+      });
+
+      if (response.ok) {
+        form.reset();
+        orderFormStatus.textContent = "";
+        showOrderSuccessScreen();
+        return;
+      }
+
+      const errorPayload = await response.json().catch(() => null);
+      const apiError =
+        errorPayload &&
+        Array.isArray(errorPayload.errors) &&
+        errorPayload.errors.length > 0 &&
+        errorPayload.errors[0].message;
+
+      orderFormStatus.textContent =
+        apiError || "Sorry, there was a problem sending your request. Please try again.";
+      orderFormStatus.className = "contact-form-status error";
+    } catch (error) {
+      orderFormStatus.textContent =
+        "Network error. Please check your connection and try again.";
+      orderFormStatus.className = "contact-form-status error";
+    }
   });
 }
 

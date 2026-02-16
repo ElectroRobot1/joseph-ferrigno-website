@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -24,7 +24,8 @@
         You only need to provide one contact method: email or phone.
       </p>
 
-      <form id="orderForm">
+      <!-- Replace action URL with your Formspree endpoint (can be same as contact form or a separate one). -->
+      <form id="orderForm" action="https://formspree.io/f/xwvnodyr" method="POST">
         <input id="serviceNameField" name="serviceName" type="hidden">
 
         <div class="form-grid">
@@ -61,13 +62,30 @@
           <textarea name="additionalDetails" placeholder="Anything else you want me to know?"></textarea>
         </label>
 
+        <!-- Honeypot field for bots -->
+        <div class="hp-field" aria-hidden="true">
+          <label for="orderCompany">Company</label>
+          <input id="orderCompany" name="_gotcha" type="text" tabindex="-1" autocomplete="off">
+        </div>
+
         <button class="submit-btn" type="submit">Submit Request</button>
-        <p class="submit-message" id="submitMessage" hidden>
-          Thanks. Your request is recorded on this page and ready to review.
-        </p>
+        <p id="orderFormStatus" class="contact-form-status" role="status" aria-live="polite"></p>
       </form>
     </div>
   </section>
+
+  <div id="orderThankYouOverlay" class="thank-you-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="orderThanksTitle">
+    <div class="thank-you-card">
+      <div class="thank-you-icon" aria-hidden="true">OK</div>
+      <h3 id="orderThanksTitle">Request Sent</h3>
+      <p id="orderThankYouText">Your service request was delivered successfully.</p>
+      <p>I will review it and follow up with you soon.</p>
+      <div class="thank-you-actions">
+        <a class="submit-btn" href="index.html">Back to Home</a>
+        <button id="closeOrderThanks" class="submit-btn" type="button">Close</button>
+      </div>
+    </div>
+  </div>
 
   <script src="order.js"></script>
 </body>

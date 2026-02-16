@@ -2,6 +2,26 @@
 // This keeps users on the page and shows status text inline.
 const contactForm = document.getElementById("contactForm");
 const contactFormStatus = document.getElementById("contactFormStatus");
+const contactThankYouOverlay = document.getElementById("contactThankYouOverlay");
+const closeContactThanks = document.getElementById("closeContactThanks");
+
+function showContactSuccessScreen() {
+  if (!contactThankYouOverlay) {
+    return;
+  }
+  contactThankYouOverlay.hidden = false;
+}
+
+function hideContactSuccessScreen() {
+  if (!contactThankYouOverlay) {
+    return;
+  }
+  contactThankYouOverlay.hidden = true;
+}
+
+if (closeContactThanks) {
+  closeContactThanks.addEventListener("click", hideContactSuccessScreen);
+}
 
 if (contactForm && contactFormStatus) {
   contactForm.addEventListener("submit", async (event) => {
@@ -24,6 +44,14 @@ if (contactForm && contactFormStatus) {
     contactFormStatus.textContent = "Sending...";
     contactFormStatus.className = "contact-form-status";
 
+    // Guard against a missing Formspree endpoint URL.
+    if (!contactForm.action.includes("formspree.io/f/")) {
+      contactFormStatus.textContent =
+        "Form endpoint is missing. Add your Formspree URL in index.html.";
+      contactFormStatus.className = "contact-form-status error";
+      return;
+    }
+
     try {
       const response = await fetch(contactForm.action, {
         method: "POST",
@@ -35,8 +63,9 @@ if (contactForm && contactFormStatus) {
 
       if (response.ok) {
         contactForm.reset();
-        contactFormStatus.textContent = "Thanks. Your message was sent successfully.";
-        contactFormStatus.className = "contact-form-status success";
+        contactFormStatus.textContent = "";
+        contactFormStatus.className = "contact-form-status";
+        showContactSuccessScreen();
         return;
       }
 

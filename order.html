@@ -10,7 +10,7 @@
   <header>
     <h1>Service Order Request</h1>
     <p>
-      Fill out the details below and I will follow up to confirm your request.
+      Fill out the details below an I will follow up to confirm your request.
     </p>
   </header>
 
@@ -22,7 +22,6 @@
       <p class="form-note">
         Required fields are marked <span class="required-star" aria-hidden="true">*</span>.
         You only need to provide one contact method: email or phone.
-        If you provide your email, you will receive a confirmation email after successful submission.
       </p>
 
       <!-- Replace action URL with your Formspree endpoint (can be same as contact form or a separate one). -->
@@ -31,7 +30,6 @@
         <input id="orderSubmissionTimestampIso" name="submission_timestamp_iso" type="hidden">
         <input id="orderSubmissionTimestampLocal" name="submission_timestamp_local" type="hidden">
         <input id="orderSubmissionId" name="submission_id" type="hidden">
-        <input id="orderEmailForFormspree" name="email" type="hidden">
 
         <div class="form-grid">
           <label class="field">
@@ -57,14 +55,28 @@
 
         <div id="dynamicFields"></div>
 
-        <label class="field">
-          <span>Preferred Date</span>
-          <input name="preferredDate" type="date">
-        </label>
+        <div id="dateFieldsGroup">
+          <label class="field" id="primaryDateField">
+            <span id="primaryDateLabel">Preferred Date</span>
+            <input id="primaryDateInput" name="preferredDate" type="date">
+          </label>
+
+          <div class="field multi-day-toggle" id="multiDayToggleField" hidden>
+            <label class="checkbox-row" for="multiDayToggle">
+              <input id="multiDayToggle" name="isMultiDayRequest" type="checkbox">
+              <span>Check if requesting more than one day</span>
+            </label>
+          </div>
+
+          <label class="field" id="endDateField" hidden>
+            <span>End Date</span>
+            <input id="endDateInput" name="endDate" type="date">
+          </label>
+        </div>
 
         <label class="field">
           <span>Additional Details</span>
-          <textarea name="additionalDetails" placeholder="Anything else you want me to know?"></textarea>
+          <textarea name="additionalDetails" placeholder="Anything else to include?"></textarea>
         </label>
 
         <!-- Honeypot field for bots -->
@@ -84,8 +96,7 @@
       <div class="thank-you-icon" aria-hidden="true">OK</div>
       <h3 id="orderThanksTitle">Request Sent</h3>
       <p id="orderThankYouText">Your service request was delivered successfully.</p>
-      <p id="orderEmailConfirmNote">If you provided your email, check your inbox and spam folder for your confirmation email.</p>
-      <p>I will review it and follow up with you soon.</p>
+      <p>Request details have been received and will be reviewed soon.</p>
       <div class="thank-you-actions">
         <a class="submit-btn" href="index.html">Back to Home</a>
         <button id="closeOrderThanks" class="submit-btn" type="button">Close</button>

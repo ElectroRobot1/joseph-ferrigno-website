@@ -1,20 +1,15 @@
-const lawnMowingWeedWhackingService = {
-  name: "Lawn Mowing/Weed Whacking",
-  description: "Provide the details below so I can quote and schedule your yard service.",
+const lawnServices = {
+  name: "Lawn Services",
+  description: "Provide details below to request lawn mowing, weed whacking, and lawn cleanup support.",
   needsHouseType: true
 };
 
 const SERVICES = {
-  "lawn-mowing-weed-whacking": lawnMowingWeedWhackingService,
-  // Keep legacy misspelling so older shared links still resolve.
-  "lawn-mowing-weed-wacking": lawnMowingWeedWhackingService,
-  "lawn-cleanup": {
-    name: "Lawn Cleanup",
-    description: "Share what kind of cleanup you need and any timing details."
-  },
+  "lawn-services": lawnServices,
   "flower-watering": {
     name: "Flower Watering",
-    description: "Let me know the schedule and any instructions for your flowers."
+    description: "Share schedule preferences and any instructions for flower care.",
+    supportsMultiDayDateRange: true
   },
   "snow-shoveling": {
     name: "Snow Shoveling",
@@ -34,7 +29,7 @@ const SERVICES = {
   },
   "moving-help": {
     name: "Moving Help",
-    description: "Provide your home type and any moving details so I can estimate support.",
+    description: "Provide home type and moving details so I can estimate support.",
     needsHouseType: true
   },
   "babysitting": {
@@ -45,7 +40,12 @@ const SERVICES = {
   "pet-sitting": {
     name: "Pet Sitting",
     description: "Add pet count and types so I can prepare for care needs.",
-    needsPetSetup: true
+    needsPetSetup: true,
+    supportsMultiDayDateRange: true
+  },
+  "website-editing": {
+    name: "Website Editing",
+    description: "Describe website updates needed and preferred timeline."
   }
 };
 
@@ -388,10 +388,61 @@ function addBabysittingFields(container) {
   container.appendChild(group);
 }
 
+function initializeDateFields(selectedService) {
+  const primaryDateLabel = document.getElementById("primaryDateLabel");
+  const primaryDateInput = document.getElementById("primaryDateInput");
+  const multiDayToggleField = document.getElementById("multiDayToggleField");
+  const multiDayToggle = document.getElementById("multiDayToggle");
+  const endDateField = document.getElementById("endDateField");
+  const endDateInput = document.getElementById("endDateInput");
+
+  if (
+    !primaryDateLabel ||
+    !primaryDateInput ||
+    !multiDayToggleField ||
+    !multiDayToggle ||
+    !endDateField ||
+    !endDateInput
+  ) {
+    return;
+  }
+
+  const applyMultiDayState = () => {
+    const isMultiDay = multiDayToggle.checked;
+    primaryDateLabel.textContent = isMultiDay ? "Start Date" : "Preferred Date";
+    primaryDateInput.name = isMultiDay ? "startDate" : "preferredDate";
+    endDateField.hidden = !isMultiDay;
+    endDateInput.required = isMultiDay;
+
+    if (!isMultiDay) {
+      endDateInput.value = "";
+    }
+  };
+
+  if (selectedService.supportsMultiDayDateRange) {
+    multiDayToggleField.hidden = false;
+    multiDayToggle.checked = false;
+    multiDayToggle.disabled = false;
+    applyMultiDayState();
+    multiDayToggle.onchange = applyMultiDayState;
+    return;
+  }
+
+  multiDayToggle.onchange = null;
+  multiDayToggle.checked = false;
+  multiDayToggle.disabled = true;
+  multiDayToggleField.hidden = true;
+  primaryDateLabel.textContent = "Preferred Date";
+  primaryDateInput.name = "preferredDate";
+  endDateField.hidden = true;
+  endDateInput.required = false;
+  endDateInput.value = "";
+}
+
 function initializeOrderPage() {
   const params = new URLSearchParams(window.location.search);
   const serviceKey = params.get("service");
-  const selectedService = SERVICES[serviceKey] || SERVICES["lawn-mowing-weed-whacking"];
+  const selectedService = SERVICES[serviceKey] || SERVICES["lawn-services"];
 
   const serviceTitle = document.getElementById("serviceTitle");
   const serviceDescription = document.getElementById("serviceDescription");
@@ -401,12 +452,10 @@ function initializeOrderPage() {
   const orderFormStatus = document.getElementById("orderFormStatus");
   const orderThankYouOverlay = document.getElementById("orderThankYouOverlay");
   const orderThankYouText = document.getElementById("orderThankYouText");
-  const orderEmailConfirmNote = document.getElementById("orderEmailConfirmNote");
   const closeOrderThanks = document.getElementById("closeOrderThanks");
   const orderSubmissionTimestampIso = document.getElementById("orderSubmissionTimestampIso");
   const orderSubmissionTimestampLocal = document.getElementById("orderSubmissionTimestampLocal");
   const orderSubmissionId = document.getElementById("orderSubmissionId");
-  const orderEmailForFormspree = document.getElementById("orderEmailForFormspree");
   const emailField = form.elements.customerEmail;
   const phoneField = form.elements.customerPhone;
 
@@ -414,17 +463,12 @@ function initializeOrderPage() {
   serviceDescription.textContent = selectedService.description;
   serviceNameField.value = selectedService.name;
 
-  const showOrderSuccessScreen = (hasEmail) => {
+  const showOrderSuccessScreen = () => {
     if (!orderThankYouOverlay) {
       return;
     }
     if (orderThankYouText) {
       orderThankYouText.textContent = `Your ${selectedService.name} request was delivered successfully.`;
-    }
-    if (orderEmailConfirmNote) {
-      orderEmailConfirmNote.textContent = hasEmail
-        ? "A confirmation email was sent. Please check your inbox and spam folder."
-        : "No email was provided, so no confirmation email was sent.";
     }
     orderThankYouOverlay.hidden = false;
   };
@@ -470,6 +514,8 @@ function initializeOrderPage() {
     addBabysittingFields(dynamicFields);
   }
 
+  initializeDateFields(selectedService);
+
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -489,11 +535,6 @@ function initializeOrderPage() {
       return;
     }
 
-    const trimmedEmail = emailField.value.trim();
-    if (orderEmailForFormspree) {
-      orderEmailForFormspree.value = trimmedEmail;
-    }
-
     const metadata = buildSubmissionMetadata("ORDER");
     if (orderSubmissionTimestampIso) {
       orderSubmissionTimestampIso.value = metadata.timestampIso;
@@ -509,7 +550,6 @@ function initializeOrderPage() {
     formData.set("submission_timestamp_iso", metadata.timestampIso);
     formData.set("submission_timestamp_local", metadata.timestampLocal);
     formData.set("submission_id", metadata.submissionId);
-    formData.set("email", trimmedEmail);
 
     try {
       const response = await fetch(form.action, {
@@ -522,11 +562,9 @@ function initializeOrderPage() {
 
       if (response.ok) {
         form.reset();
-        if (orderEmailForFormspree) {
-          orderEmailForFormspree.value = "";
-        }
+        initializeDateFields(selectedService);
         orderFormStatus.textContent = "";
-        showOrderSuccessScreen(trimmedEmail.length > 0);
+        showOrderSuccessScreen();
         return;
       }
 

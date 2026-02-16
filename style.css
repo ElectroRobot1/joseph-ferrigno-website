@@ -6,6 +6,10 @@ body {
   line-height: 1.6;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 header {
   background: linear-gradient(135deg, #14532d, #166534);
   color: white;
@@ -181,6 +185,21 @@ h2 {
 .field textarea {
   min-height: 120px;
   resize: vertical;
+}
+
+.multi-day-toggle {
+  margin-top: 0.35rem;
+}
+
+.checkbox-row {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.55rem;
+}
+
+.checkbox-row input[type="checkbox"] {
+  margin: 0;
+  width: auto;
 }
 
 .slider-field input[type="number"] {

@@ -5,6 +5,8 @@ const BANNER_CONFIG = {
   maxHeightPx: 300,
   // Compact banner height as a scale of max height (0.25 = 25%).
   minScale: 0.5,
+  // Order pages always use half-banner mode; control that size here.
+  staticHalfScale: 0.5,
   // Scroll distance in pixels to reach compact size.
   shrinkDistancePx: 280,
   // Progress threshold to switch from full banner to half banner (0..1).
@@ -16,15 +18,27 @@ function initializeSiteBanner() {
   if (!banner) {
     return;
   }
+  const bannerMode = banner.dataset.bannerMode || "dynamic";
 
   const minScale = Math.min(1, Math.max(0.05, BANNER_CONFIG.minScale));
+  const staticHalfScale = Math.min(1, Math.max(0.05, BANNER_CONFIG.staticHalfScale));
   const switchAt = Math.min(1, Math.max(0, BANNER_CONFIG.switchAtProgress));
   const shrinkDistance = Math.max(1, BANNER_CONFIG.shrinkDistancePx);
 
   const root = document.documentElement;
   const maxHeight = BANNER_CONFIG.maxHeightPx;
   const minHeight = Math.round(maxHeight * minScale);
+  const staticHalfHeight = Math.round(maxHeight * staticHalfScale);
   let isTicking = false;
+
+  // Static mode for pages that should always show the compact half banner.
+  if (bannerMode === "static-half") {
+    root.style.setProperty("--banner-current-height", `${staticHalfHeight}px`);
+    root.style.setProperty("--banner-max-height", `${maxHeight}px`);
+    root.style.setProperty("--banner-min-height", `${staticHalfHeight}px`);
+    banner.classList.add("is-condensed", "use-half");
+    return;
+  }
 
   const render = () => {
     const scrollY = window.scrollY || window.pageYOffset || 0;

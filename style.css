@@ -15,7 +15,12 @@ body {
   background: linear-gradient(135deg, #14532d, #166534);
   color: white;
   text-align: center;
-  padding: 3rem 1.5rem;
+  padding: 1.25rem 1rem;
+}
+
+.page-header p {
+  margin: 0;
+  font-size: 0.98rem;
 }
 
 .site-banner {
@@ -55,6 +60,14 @@ body {
 }
 
 .site-banner.use-half .banner-half {
+  opacity: 1;
+}
+
+.site-banner[data-banner-mode="static-half"] .banner-full {
+  opacity: 0;
+}
+
+.site-banner[data-banner-mode="static-half"] .banner-half {
   opacity: 1;
 }
 

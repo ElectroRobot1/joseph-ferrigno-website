@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Not Found | GreenFrame Services</title>
+  <link rel="icon" type="image/png" href="/GreenFrame-Services/Favicon.png">
+  <style>
+    :root {
+      color-scheme: light;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(160deg, #ecfdf5 0%, #f8fafc 70%);
+      color: #1f2933;
+      padding: 1.25rem;
+      box-sizing: border-box;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 14px;
+      box-shadow: 0 14px 35px rgba(15, 23, 42, 0.16);
+      max-width: 640px;
+      width: 100%;
+      padding: 1.5rem;
+    }
+
+    h1 {
+      margin: 0 0 0.65rem;
+      color: #14532d;
+      font-size: 1.7rem;
+    }
+
+    p {
+      margin: 0.35rem 0;
+      line-height: 1.5;
+    }
+
+    code {
+      background: #f3f4f6;
+      border-radius: 6px;
+      padding: 0.1rem 0.35rem;
+    }
+
+    .actions {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+    }
+
+    .btn {
+      display: inline-block;
+      background: #166534;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 8px;
+      padding: 0.62rem 0.9rem;
+      font-weight: 600;
+    }
+
+    .btn:hover,
+    .btn:focus-visible {
+      background: #14532d;
+    }
+
+    .muted {
+      color: #4b5563;
+      font-size: 0.92rem;
+      margin-top: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Page Not Found (404)</h1>
+    <p>The URL entered does not match a valid page.</p>
+    <p>Requested path: <code id="badPath"></code></p>
+
+    <div class="actions">
+      <a id="homeLink" class="btn" href="/GreenFrame-Services/">Go To Main Page</a>
+    </div>
+
+    <p class="muted">
+      Expected format:
+      <code>electrorobot1.github.io/GreenFrame-Services/[valid-page]</code>
+    </p>
+  </main>
+
+  <script>
+    (function () {
+      const pathEl = document.getElementById("badPath");
+      const homeLink = document.getElementById("homeLink");
+      const isGitHubPages = window.location.hostname.endsWith("github.io");
+      const homeHref = isGitHubPages ? "/GreenFrame-Services/" : "/";
+
+      pathEl.textContent = window.location.pathname || "/";
+      homeLink.href = homeHref;
+    })();
+  </script>
+</body>
+</html>

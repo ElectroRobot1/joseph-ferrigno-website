@@ -133,10 +133,11 @@ function createDynamicGroup(title, description) {
 }
 
 function createSliderControl(config) {
-  const wrapper = document.createElement("label");
+  const wrapper = document.createElement("div");
   wrapper.className = "field slider-field";
 
-  const label = document.createElement("span");
+  // Create a separate <label> associated with the range control via htmlFor
+  const label = document.createElement("label");
   label.textContent = config.label;
   if (config.required) {
     appendRequiredStar(label);
@@ -159,6 +160,10 @@ function createSliderControl(config) {
   rangeInput.step = String(config.step || 1);
   rangeInput.value = String(config.value);
   rangeInput.name = config.name;
+  // generate a unique id to associate the label with the range input
+  const uid = `${config.name}_${Math.random().toString(36).slice(2, 8)}`;
+  rangeInput.id = uid;
+  label.htmlFor = uid;
   wrapper.appendChild(rangeInput);
 
   const syncFromNumber = () => {
@@ -285,55 +290,113 @@ function addPetFields(container) {
 
   const renderPetTypeFields = () => {
     const petCount = petCountControl.getValue();
-    petTypesContainer.innerHTML = "";
 
-    for (let index = 1; index <= petCount; index += 1) {
-      const petTypeField = document.createElement("label");
-      petTypeField.className = "field";
-
-      const petLabel = document.createElement("span");
-      petLabel.textContent = `Pet ${index} Type`;
-      appendRequiredStar(petLabel);
-      petTypeField.appendChild(petLabel);
-
-      const select = document.createElement("select");
-      select.name = `petType${index}`;
-      select.required = true;
-
-      const placeholder = document.createElement("option");
-      placeholder.value = "";
-      placeholder.textContent = "Select pet type";
-      placeholder.disabled = true;
-      placeholder.selected = true;
-      select.appendChild(placeholder);
-
-      PET_OPTIONS.forEach((petOption) => {
-        const option = document.createElement("option");
-        option.value = petOption;
-        option.textContent = petOption;
-        select.appendChild(option);
-      });
-
-      petTypeField.appendChild(select);
-
-      const otherInput = document.createElement("input");
-      otherInput.className = "other-input";
-      otherInput.type = "text";
-      otherInput.name = `petTypeOther${index}`;
-      otherInput.placeholder = "Please enter your pet type";
-      otherInput.hidden = true;
-      petTypeField.appendChild(otherInput);
-
-      select.addEventListener("change", () => {
-        const showOther = select.value === "Other";
-        otherInput.hidden = !showOther;
-        otherInput.required = showOther;
-        if (!showOther) {
-          otherInput.value = "";
+    // Build a map of existing values keyed by index to preserve user input
+    const existing = {};
+    petTypesContainer.querySelectorAll('select[name^="petType"]').forEach((s) => {
+      const m = s.name.match(/^petType(\d+)$/);
+      if (m) {
+        const idx = Number(m[1]);
+        existing[idx] = existing[idx] || {};
+        existing[idx].type = s.value;
+        const other = petTypesContainer.querySelector(`input[name="petTypeOther${idx}"]`);
+        if (other) {
+          existing[idx].other = other.value;
         }
-      });
+      }
+    });
 
-      petTypesContainer.appendChild(petTypeField);
+    // Remove extra fields if petCount decreased
+    const existingIndices = Array.from(petTypesContainer.querySelectorAll('select[name^="petType"]')).map((s) => {
+      const m = s.name.match(/^petType(\d+)$/);
+      return m ? Number(m[1]) : null;
+    }).filter(Boolean);
+    const maxExisting = existingIndices.length ? Math.max(...existingIndices) : 0;
+    for (let i = maxExisting; i > petCount; i -= 1) {
+      const node = petTypesContainer.querySelector(`select[name="petType${i}"]`);
+      if (node && node.parentElement) {
+        petTypesContainer.removeChild(node.parentElement);
+      }
+    }
+
+    // Create or restore fields up to petCount
+    for (let index = 1; index <= petCount; index += 1) {
+      // If field already exists, ensure option list and otherInput state are correct
+      let existingSelect = petTypesContainer.querySelector(`select[name="petType${index}"]`);
+      if (!existingSelect) {
+        const petTypeField = document.createElement("label");
+        petTypeField.className = "field";
+
+        const petLabel = document.createElement("span");
+        petLabel.textContent = `Pet ${index} Type`;
+        appendRequiredStar(petLabel);
+        petTypeField.appendChild(petLabel);
+
+        const select = document.createElement("select");
+        select.name = `petType${index}`;
+        select.required = true;
+
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "Select pet type";
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        select.appendChild(placeholder);
+
+        PET_OPTIONS.forEach((petOption) => {
+          const option = document.createElement("option");
+          option.value = petOption;
+          option.textContent = petOption;
+          select.appendChild(option);
+        });
+
+        petTypeField.appendChild(select);
+
+        const otherInput = document.createElement("input");
+        otherInput.className = "other-input";
+        otherInput.type = "text";
+        otherInput.name = `petTypeOther${index}`;
+        otherInput.placeholder = "Please enter your pet type";
+        otherInput.hidden = true;
+        petTypeField.appendChild(otherInput);
+
+        select.addEventListener("change", () => {
+          const showOther = select.value === "Other";
+          otherInput.hidden = !showOther;
+          otherInput.required = showOther;
+          if (!showOther) {
+            otherInput.value = "";
+          }
+        });
+
+        petTypesContainer.appendChild(petTypeField);
+        existingSelect = select;
+      }
+
+      // Restore existing values if present
+      const existingVal = existing[index] && existing[index].type;
+      const otherVal = existing[index] && existing[index].other;
+      if (existingVal) {
+        // If option exists, set it; otherwise, set to Other and populate other input
+        const optionExists = Array.from(existingSelect.options).some(o => o.value === existingVal);
+        if (optionExists) {
+          existingSelect.value = existingVal;
+          const otherInput = petTypesContainer.querySelector(`input[name="petTypeOther${index}"]`);
+          if (otherInput) {
+            otherInput.hidden = true;
+            otherInput.required = false;
+            otherInput.value = "";
+          }
+        } else {
+          existingSelect.value = "Other";
+          const otherInput = petTypesContainer.querySelector(`input[name="petTypeOther${index}"]`);
+          if (otherInput) {
+            otherInput.hidden = false;
+            otherInput.required = true;
+            otherInput.value = otherVal || existingVal;
+          }
+        }
+      }
     }
   };
 
@@ -366,14 +429,52 @@ function addBabysittingFields(container) {
 
   const renderAgeFields = () => {
     const childCount = childCountControl.getValue();
-    agesContainer.innerHTML = "";
 
+    // Preserve existing age values keyed by index
+    const existing = {};
+    agesContainer.querySelectorAll('input[name^="child"]').forEach((inp) => {
+      const m = inp.name.match(/^child(\d+)Age(?:_input)?$/);
+      if (m) {
+        const idx = Number(m[1]);
+        // prefer numeric value if parseable
+        const v = parseInt(inp.value, 10);
+        if (!Number.isNaN(v)) {
+          existing[idx] = v;
+        }
+      }
+    });
+
+    // Remove extra fields if childCount decreased
+    const existingIndices = Array.from(agesContainer.querySelectorAll('input[name^="child"]')).map(i => {
+      const m = i.name.match(/^child(\d+)Age(?:_input)?$/);
+      return m ? Number(m[1]) : null;
+    }).filter(Boolean);
+    const maxExisting = existingIndices.length ? Math.max(...existingIndices) : 0;
+    for (let i = maxExisting; i > childCount; i -= 1) {
+      const node = agesContainer.querySelector(`input[name="child${i}Age"]`);
+      if (node && node.parentElement) {
+        agesContainer.removeChild(node.parentElement);
+      }
+    }
+
+    // Create or restore fields up to childCount
     for (let index = 1; index <= childCount; index += 1) {
+      const preserved = existing[index] !== undefined ? existing[index] : 8;
+      const existingWrapper = agesContainer.querySelector(`input[name="child${index}Age"]`);
+      if (existingWrapper) {
+        // already present, ensure value preserved
+        const numberInput = agesContainer.querySelector(`input[name="child${index}Age_input"]`);
+        const rangeInput = agesContainer.querySelector(`input[name="child${index}Age"]`);
+        if (numberInput) numberInput.value = String(preserved);
+        if (rangeInput) rangeInput.value = String(preserved);
+        continue;
+      }
+
       const ageControl = createSliderControl({
         label: `How old is child ${index}?`,
         min: 0,
         max: 17,
-        value: 8,
+        value: preserved,
         name: `child${index}Age`,
         required: true
       });
@@ -456,12 +557,28 @@ function initializeOrderPage() {
   const orderSubmissionTimestampIso = document.getElementById("orderSubmissionTimestampIso");
   const orderSubmissionTimestampLocal = document.getElementById("orderSubmissionTimestampLocal");
   const orderSubmissionId = document.getElementById("orderSubmissionId");
+
+  // Validate required DOM elements to avoid runtime exceptions later
+  if (!form || !dynamicFields || !serviceTitle || !orderFormStatus) {
+    console.error("Order page initialization failed: missing required DOM elements (form, dynamicFields, serviceTitle, or orderFormStatus). Aborting initialization.");
+    return;
+  }
+
+  if (!form.elements || !form.elements.customerEmail || !form.elements.customerPhone) {
+    console.error("Order form is missing expected contact fields: customerEmail and/or customerPhone. Aborting initialization.");
+    return;
+  }
+
   const emailField = form.elements.customerEmail;
   const phoneField = form.elements.customerPhone;
 
   serviceTitle.textContent = `${selectedService.name} Request`;
-  serviceDescription.textContent = selectedService.description;
-  serviceNameField.value = selectedService.name;
+  if (serviceDescription) {
+    serviceDescription.textContent = selectedService.description;
+  }
+  if (serviceNameField) {
+    serviceNameField.value = selectedService.name;
+  }
 
   const showOrderSuccessScreen = () => {
     if (!orderThankYouOverlay) {
